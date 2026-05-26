@@ -78,8 +78,6 @@ Gradient-boosted decision trees (`LGBMClassifier`).
 
 Raw LightGBM probabilities are inflated because the model is trained on SMOTE-resampled data (1:10 ratio) rather than the true 0.098% prevalence. A **logistic regression** is fitted on the pooled out-of-fold (OOF) raw probabilities against true labels. Because OOF predictions are never seen during training, this calibration step is valid and leakage-free.
 
-The calibrated score is essentially equal to the theoretical minimum — near-perfect probability calibration. See [Calibration](#calibration) in Results for Brier scores.
-
 ### 6. Risk Tier Thresholds
 
 Two probability thresholds are derived from the OOF calibrated probabilities:
@@ -96,25 +94,9 @@ Tier assignment:
 
 ---
 
-## Output Files
-
-| File | Description |
-|---|---|
-| [`outputs/results/v2/v2_model_metrics.csv`](../outputs/results/v2/v2_model_metrics.csv) | AUROC, PR-AUC, Brier scores, and tier thresholds |
-| [`outputs/results/v2/v2_risk_tiers.csv`](../outputs/results/v2/v2_risk_tiers.csv) | Per-tier record counts, malignant counts, sensitivity, and PPV |
-| [`outputs/graphs/v2/roc_pr_curves.png`](../outputs/graphs/v2/roc_pr_curves.png) | ROC curve and Precision-Recall curve with threshold markers |
-| [`outputs/graphs/v2/calibration_curve.png`](../outputs/graphs/v2/calibration_curve.png) | Raw vs Platt-calibrated probability reliability diagrams |
-| [`outputs/graphs/v2/risk_tier_distribution.png`](../outputs/graphs/v2/risk_tier_distribution.png) | Record counts, malignant capture, and probability distribution per tier |
-| [`outputs/graphs/v2/fold_results.png`](../outputs/graphs/v2/fold_results.png) | Per-fold PR-AUC and AUROC bar charts |
-
----
-
 ## Results
 
 ### Discrimination Metrics
-
-> Full metrics: [`outputs/results/v2/v2_model_metrics.csv`](../outputs/results/v2/v2_model_metrics.csv)
-> Curves: [`outputs/graphs/v2/roc_pr_curves.png`](../outputs/graphs/v2/roc_pr_curves.png) · [`outputs/graphs/v2/fold_results.png`](../outputs/graphs/v2/fold_results.png)
 
 | Metric | Value |
 |---|---|
@@ -128,9 +110,19 @@ AUROC of 0.9347 means: if one malignant and one benign record are drawn at rando
 
 PR-AUC of 0.054 looks small in isolation but must be interpreted relative to the prevalence baseline (~0.001 at 0.098% malignancy rate). The model is 55× better than random on the precision-recall tradeoff.
 
+![ROC and PR Curves](../outputs/graphs/v2/roc_pr_curves.png)
+
+The left plot shows the ROC curve — the steep early rise confirms the model separates malignant from benign well before reaching high false-positive rates. The right plot shows the Precision-Recall curve; the dashed gray line is the random baseline (prevalence = 0.098%), and the model consistently sits above it.
+
+Per-fold stability ([`outputs/results/v2/v2_model_metrics.csv`](../outputs/results/v2/v2_model_metrics.csv)):
+
+![Fold Results](../outputs/graphs/v2/fold_results.png)
+
+AUROC is consistent across all five folds (std = 0.008), confirming the model is not overfitting to a single fold's patient group.
+
 ### Calibration
 
-> Reliability diagram: [`outputs/graphs/v2/calibration_curve.png`](../outputs/graphs/v2/calibration_curve.png)
+Raw LightGBM probabilities are inflated ~10× by SMOTE resampling. Platt scaling corrects this:
 
 | | Brier Score |
 |---|---|
@@ -138,10 +130,13 @@ PR-AUC of 0.054 looks small in isolation but must be interpreted relative to the
 | Calibrated (Platt) | **0.000963** |
 | Baseline (always predict base rate) | 0.000979 |
 
-### Risk Tier Summary
+The calibrated Brier score is essentially equal to the theoretical minimum — near-perfect probability calibration.
 
-> Full breakdown: [`outputs/results/v2/v2_risk_tiers.csv`](../outputs/results/v2/v2_risk_tiers.csv)
-> Visualisation: [`outputs/graphs/v2/risk_tier_distribution.png`](../outputs/graphs/v2/risk_tier_distribution.png)
+![Calibration Curve](../outputs/graphs/v2/calibration_curve.png)
+
+The left panel shows the raw model's probabilities are severely overestimated. The right panel shows the calibrated probabilities tracking the diagonal (perfect calibration) closely.
+
+### Risk Tier Summary
 
 | Tier | Records | % of Total | Malignant Captured | Sensitivity | PPV | vs Base Rate |
 |---|---|---|---|---|---|---|
@@ -153,6 +148,12 @@ PR-AUC of 0.054 looks small in isolation but must be interpreted relative to the
 - The model directs 91.2% of records to Low risk while capturing 76.1% of all malignant cases in the top two tiers combined.
 - The High tier alone is **15× enriched** over the population malignancy rate.
 - Low tier PPV (0.026%) is well **below** the base rate (0.098%), correctly de-risking the bulk of records.
+
+![Risk Tier Distribution](../outputs/graphs/v2/risk_tier_distribution.png)
+
+The left panel shows how records are distributed across tiers. The middle panel shows how malignant cases concentrate in High and Medium. The right panel shows the probability distributions per tier — the thresholds (dashed lines) cleanly separate the distributions.
+
+Full tier breakdown: [`outputs/results/v2/v2_risk_tiers.csv`](../outputs/results/v2/v2_risk_tiers.csv)
 
 ---
 
