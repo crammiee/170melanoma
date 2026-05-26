@@ -7,5 +7,6 @@ scikit-learn
 lightgbm
 imbalanced-learn
 shap
+optuna
 jupyter
 ipykernel

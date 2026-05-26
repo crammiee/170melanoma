@@ -1,0 +1,4 @@
+tier,n_records,n_malignant,sensitivity,ppv
+High,7477,196,0.4987,0.026214
+Medium,30795,95,0.2417,0.003085
+Low,362787,102,0.2595,0.000281
