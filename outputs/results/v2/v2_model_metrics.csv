@@ -1,0 +1,2 @@
+mean_pr_auc_raw,std_pr_auc_raw,mean_auroc_raw,std_auroc_raw,pr_auc_calibrated,auroc_calibrated,brier_raw,brier_calibrated,brier_baseline,threshold_high,threshold_medium,sensitivity_at_high,specificity_at_high
+0.053852,0.025516,0.934718,0.00807,0.038054,0.886421,0.009163,0.000963,0.000979,0.001544,0.000825,0.760814,0.912478

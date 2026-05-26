@@ -7,9 +7,6 @@ env/
 data/raw/
 data/processed/
 
-# Generated outputs
-outputs/
-
 # Jupyter
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/

@@ -5,5 +5,7 @@ seaborn
 scipy
 scikit-learn
 lightgbm
+imbalanced-learn
+shap
 jupyter
 ipykernel
